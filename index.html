@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#B23A32">
+<title>研政通 · 考研政治刷题</title>
+<meta name="description" content="考研政治在线刷题：1894 道题目、53 个章节、15 套历年真题、69 个背诵考点、22 套大题模板。">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div id="boot" class="boot">
+  <div class="boot-mark">研</div>
+  <div class="boot-title">研政通</div>
+  <div class="boot-sub">正在装载离线全真题库…</div>
+  <div class="boot-bar"><i id="boot-fill"></i></div>
+  <div class="boot-tip" id="boot-tip">读取科目与章节…</div>
+</div>
+
+<div id="shell" class="shell hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">研</div>
+      <div class="brand-txt"><b>研政通</b><span>考研政治刷题助手</span></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <div class="side-progress"><span id="side-progress-label">题库加载中</span><b id="side-progress-num"></b></div>
+      <div class="progress thin"><i id="side-progress-fill"></i></div>
+      <div class="side-note">进度保存在本浏览器 · 无需登录</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" data-act="menu" aria-label="打开菜单">☰</button>
+      <div class="topbar-title" id="topbar-title">总览</div>
+      <div class="topbar-spacer"></div>
+      <div class="global-search">
+        <span class="search-ico">⌕</span>
+        <input id="global-search" type="search" placeholder="搜题目 / 考点 / 解析…" autocomplete="off">
+        <kbd>Enter</kbd>
+      </div>
+      <div class="countdown" id="countdown"></div>
+      <button class="icon-btn" data-act="go" data-view="settings" title="设置" aria-label="设置">⚙</button>
+    </header>
+    <main class="content" id="view"></main>
+  </div>
+</div>
+
+<div class="mask hidden" id="mask" data-act="close-sheet"></div>
+<div class="sheet-wrap hidden" id="sheet-wrap"><div class="sheet" id="sheet"></div></div>
+<div class="toast-wrap" id="toast-wrap"></div>
+<input type="file" id="import-file" accept="application/json,.json" hidden>
+
+<script src="./js/core.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>
