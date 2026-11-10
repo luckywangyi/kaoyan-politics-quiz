@@ -50,6 +50,7 @@
         { v: 'review', ico: '↻', t: '到期复习', badge: st.due },
         { v: 'favorites', ico: '★', t: '我的收藏', badge: st.favorites },
         { v: 'recite', ico: '📖', t: '沉浸背诵' },
+        { v: 'timeline', ico: '⌛', t: '时间轴图谱' },
         { v: 'templates', ico: '◇', t: '万能模板' },
         { v: 'essays', ico: '✎', t: '材料分析题' }
       ] },
@@ -94,7 +95,12 @@
       quick('◇', '万能模板', meta.stats.templates + ' 套答题框架', 'templates') +
       quick('✎', '肖四大题', '智能采分对比', 'essays') +
       quick('★', '我的收藏', st.favorites + ' 道已收藏', 'favorites') +
-      '</div>';
+      '</div>' +
+      '<button class="tl-banner" data-act="go" data-view="timeline">' +
+      '<span class="tl-banner-em">⌛</span>' +
+      '<span class="tl-banner-txt"><b>时间轴记忆图谱</b>' +
+      '<span>1840—2026 · 41 个高频考点，按时期分色串联背景 / 内容 / 意义，可折叠、可挖空自测</span></span>' +
+      '<span class="tl-banner-go">查看 →</span></button>';
 
     html += '<div class="sec-title"><i class="dot"></i>六大体系知识树' +
       '<span class="more">肖1000题 + 统考真题 + 时政专项</span></div><div class="grid g2">' +

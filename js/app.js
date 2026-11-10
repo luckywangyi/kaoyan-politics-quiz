@@ -6,7 +6,8 @@
   var TITLES = {
     home: '学习总览', chapters: '章节刷题', exams: '真题模考', practice: '刷题练习',
     mistakes: '错题本', review: '到期复习', favorites: '我的收藏', recite: '沉浸背诵',
-    templates: '万能模板', essays: '材料分析题', search: '全文检索', report: '学习报告', settings: '设置'
+    timeline: '时间轴图谱', templates: '万能模板', essays: '材料分析题', search: '全文检索',
+    report: '学习报告', settings: '设置'
   };
   var lastNonPracticeHash = '#/home';
 
@@ -56,7 +57,7 @@
     $('side-progress-num').textContent = stats.total ? Y.pct(stats.done, stats.total) + '%' : '';
     $('side-progress-fill').style.width = (stats.total ? Y.pct(stats.done, stats.total) : 0) + '%';
 
-    var needData = ['chapters', 'exams', 'practice', 'mistakes', 'favorites', 'review', 'search', 'report', 'essays'].indexOf(view) >= 0;
+    var needData = ['chapters', 'exams', 'practice', 'mistakes', 'favorites', 'review', 'search', 'report', 'essays', 'timeline'].indexOf(view) >= 0;
     if (needData && !Y.BANK.questions.length) {
       $('view').innerHTML = '<div class="card">' + V.empty('⏳', '题库正在装载…', '首次加载约 3 MB，稍候即可开始刷题') + '</div>';
       Y.BANK.ready.then(function () { render(); });
@@ -185,6 +186,9 @@
         break;
       }
       case 'menu': $('sidebar').classList.toggle('open'); break;
+      case 'tl':
+        if (window.TL && TL.act(d)) render();
+        break;
       case 'close-sheet': closeSheet(); break;
       case 'confirm-ok': {
         var fn = pendingConfirm; pendingConfirm = null; closeSheet();
