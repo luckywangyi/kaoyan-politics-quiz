@@ -59,7 +59,7 @@
   function defaultState() {
     return {
       v: 1,
-      answers: {},      // qid -> {a:[labels], ok:2正确/1少选/0错误, t, note}
+      answers: {},      // qid -> {a:[labels], ok:2正确/0错误（少选也计0分）, t, note}
       favorites: [],    // qid[]
       review: {},       // qid -> SM-2 调度
       mistakes: {},     // qid -> {count, streak, mastered, last}
@@ -166,14 +166,15 @@
     var allHit = key.length > 0 && key.every(function (x) { return sel.indexOf(x) >= 0; });
     var noExtra = sel.every(function (x) { return key.indexOf(x) >= 0; });
     if (allHit && noExtra) return { ok: 2, key: key, sel: sel, kind: 'correct' };
-    if (noExtra && sel.length < key.length) return { ok: 1, key: key, sel: sel, kind: 'partial' };
+    // 真实考试：多选、少选、错选均不得分，没有部分分。kind 仅用于提示「漏选」
+    if (noExtra && sel.length < key.length) return { ok: 0, key: key, sel: sel, kind: 'partial' };
     return { ok: 0, key: key, sel: sel, kind: 'wrong' };
   };
 
   function schedule(qid, ok, seconds) {
     var st = Y.state;
     var r = st.review[qid] || { rep: 0, interval: 1, ef: 2.5, due: Y.today(), mistakes: 0, state: 'NEW' };
-    var q = ok === 2 ? (seconds > 45 ? 4 : 5) : (ok === 1 ? 2 : 0);
+    var q = ok === 2 ? (seconds > 45 ? 4 : 5) : 0;
     var dq = 5 - q;
     var ef = Y.clamp(r.ef + 0.1 - dq * (0.08 + dq * 0.02), 1.3, 2.8);
     var rep, iv;
@@ -247,7 +248,7 @@
     var done = ids.length, correct = 0, partial = 0, wrong = 0;
     ids.forEach(function (id) {
       var ok = st.answers[id].ok;
-      if (ok === 2) correct++; else if (ok === 1) partial++; else wrong++;
+      if (ok === 2) correct++; else wrong++; // 真实考试无部分分，partial 恒为 0
     });
     var days = Object.keys(st.daily);
     var attempts = 0, totalCorrect = 0;

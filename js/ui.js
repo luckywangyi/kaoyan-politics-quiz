@@ -233,7 +233,7 @@
 
     if (!locked && q.type === 'MULTI_CHOICE') {
       html += '<div class="submit-row"><button class="btn btn-primary" data-act="submit-multi" ' + (sel.length ? '' : 'disabled') + '>确认提交（已选 ' + sel.length + ' 项）</button>' +
-        '<span class="small muted">多选题需手动提交；少选不得分</span></div>';
+        '<span class="small muted">多选题需手动提交；多选、少选、错选均不得分</span></div>';
     }
     if (locked) html += feedback(q, ans, memorize, key);
     html += '</div>';
@@ -249,9 +249,13 @@
     return html;
   };
   function feedback(q, ans, memorize, key) {
-    var cls = memorize ? '' : ans.ok === 2 ? 'ok' : ans.ok === 1 ? 'part' : 'bad';
+    var cls = memorize ? '' : ans.ok === 2 ? 'ok' : 'bad';
+    var missed = ans && key && ans.a.length > 0 && ans.a.length < key.length &&
+      ans.a.every(function (x) { return key.indexOf(x) >= 0; });
     var title = memorize ? '背题模式 · 官方标准考点精析'
-      : ans.ok === 2 ? '✓ 回答正确！' : ans.ok === 1 ? '△ 少选 / 漏选（未拿全 2 分）' : '✗ 回答错误（已编入艾宾浩斯复习流）';
+      : ans.ok === 2 ? '✓ 回答正确！'
+      : missed ? '✗ 漏选（少选同样 0 分，已编入错题本）'
+      : '✗ 回答错误（已编入艾宾浩斯复习流）';
     var h = '<div class="feedback ' + cls + '"><div class="fb-head">' + title + '</div>' +
       '<div class="answers"><span>正确答案：<b>' + key.join('') + '</b></span>' +
       (ans ? '<span>你的作答：<b>' + (ans.a.length ? ans.a.join('') : '未作答') + '</b></span>' : '') +
@@ -293,7 +297,7 @@
     var done = 0, cor = 0;
     var cells = qs.map(function (q, i) {
       var a = S().answers[q.id], cls = '';
-      if (a) { done++; if (a.ok === 2) cor++; cls = a.ok === 2 ? 'ok' : a.ok === 1 ? 'part' : 'bad'; }
+      if (a) { done++; if (a.ok === 2) cor++; cls = a.ok === 2 ? 'ok' : 'bad'; }
       if (i === s.index) cls += ' cur';
       return '<button class="ans-cell ' + cls + '" data-act="jump" data-i="' + i + '">' + (i + 1) +
         '<small>' + (q.type === 'MULTI_CHOICE' ? '多选' : '单选') + '</small></button>';
@@ -302,8 +306,7 @@
       '<div class="sheet-body"><div class="spread" style="margin-bottom:12px"><span class="small muted">已答 ' + done + ' / ' + qs.length + ' 题 · 答对 ' + cor + ' 题</span>' +
       '<button class="btn btn-sm btn-primary" data-act="finish">诊断报告</button></div>' +
       '<div class="legend"><span><i style="background:var(--green-soft);border:1px solid var(--green)"></i>正确</span>' +
-      '<span><i style="background:var(--amber-soft);border:1px solid var(--amber)"></i>少选</span>' +
-      '<span><i style="background:var(--danger-soft);border:1px solid var(--danger)"></i>错误</span>' +
+      '<span><i style="background:var(--danger-soft);border:1px solid var(--danger)"></i>错误（含少选、错选）</span>' +
       '<span><i style="background:var(--surface2);border:1px solid var(--brand)"></i>当前题</span>' +
       '<span><i style="background:var(--surface3);border:1px solid var(--line)"></i>未答</span></div>' +
       '<div class="answer-sheet-grid">' + cells + '</div></div>';
@@ -639,16 +642,19 @@
 
     html += '<div class="card card-pad" style="margin-top:14px"><b>题库信息</b>' +
       '<div class="small muted" style="margin:8px 0 12px">' +
-      '数据版本 web-1.0 · 生成于 ' + e(meta.generated) + '<br>' +
-      '源自 Android 端预置库 politics_prepackaged.db，并按 2026 年公开权威资料扩充时政专项。</div>' +
+      '数据版本 web-1.1 · 生成于 ' + e(meta.generated) + '<br>' +
+      '源自 Android 端预置库 politics_prepackaged.db；补充题已写回该库，SQLite 为单一数据源。</div>' +
       '<div class="grid g4">' + statBox('题目', meta.stats.questions) + statBox('单选题', meta.stats.single) +
       statBox('多选题', meta.stats.multi) + statBox('材料分析题', meta.stats.essay) + '</div>' +
       '<div class="grid g4" style="margin-top:12px">' + statBox('章节', meta.stats.chapters) +
       statBox('真题卷', meta.stats.examPapers) + statBox('背诵考点', meta.stats.knowledgePoints) +
       statBox('答题模板', meta.stats.templates) + '</div>' +
       '<div class="divider"></div><div class="small muted">' +
-      '来源标签：' + meta.tags.map(function (t) { return '<span class="tag" style="margin:2px">' + e(t) + '</span>'; }).join('') +
-      '<br>新增 ' + meta.extraCount + ' 道 2026 时政题（二十届四中全会、「十五五」规划、2026 全国两会与政府工作报告、四大全球倡议、上合组织天津峰会、海南自贸港封关、科技成就等）。' +
+      '来源标签（可在首页按标签专项练习）：' + meta.tags.map(function (t) { return '<span class="tag" style="margin:2px">' + e(t) + '</span>'; }).join('') +
+      '<br>补充题共 ' + meta.extraCount + ' 道：2026 时政 42 道（依据新华社公报、中国人大网等官方原文编写）、习思想新表述加练 26 道、近年真题回忆版 6 道，另有 45 道旧版时政题。' +
+      '<br>2027 大纲时政考查范围为 2026 年 1—12 月；标签「2025时政特训」及部分「2026时政更新」涉及 2025 年事件，解析内已附范围提示，仅供知识点练习。' +
+      '<br>标注「回忆版」的题目非官方原题；标注「依据官方原文编写」的题目为练习编写题，固定表述与数字请回原文核对。' +
+      '<br>判分规则与真实考试一致：多选、少选、错选均不得分，没有部分分。' +
       '<br><br>提示：本站为静态网页，无需登录、无需后端，断网后已加载的题库仍可继续刷题。</div></div>';
     return html;
   };
