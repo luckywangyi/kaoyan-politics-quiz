@@ -67,8 +67,14 @@
       .sort(function (a, b) { return (a.index || 0) - (b.index || 0); });
   }
   /* 章节练习只组选择题，材料分析题走「材料分析题」页；这里给出实际可练题量 */
+  function X() { return B().xref || {}; }
+  function secCount(cid, si) { var m = X().secCount || {}; return m[cid + ':' + si] || 0; }
+  function ptCount(cid, si, pi) { var m = X().ptCount || {}; return m[cid + ':' + si + ':' + pi] || 0; }
   function practiceCount(c) {
-    var n = B().questions.filter(function (q) { return q.ch === c.id && q.type !== 'ESSAY'; }).length;
+    var m = X().chapterChoice || {};
+    var n = m[String(c.id)] || 0;
+    if (n) return n;
+    n = B().questions.filter(function (q) { return q.ch === c.id && q.type !== 'ESSAY'; }).length;
     return n || c.count || 0;
   }
 
@@ -174,10 +180,12 @@
     var at = list.findIndex(function (x) { return x.id === cid; });
     var prev = at > 0 ? list[at - 1] : null;
     var next = at >= 0 && at < list.length - 1 ? list[at + 1] : null;
+    var csrc = (X().chapterSrc || {})[String(cid)] || {};
 
     var html = '<div class="page-head"><div><h1>' + e(c.title) + '</h1>' +
       '<p>' + e(s.name) + ' · ' + d.secs.length + ' 节 · ' +
       d.secs.reduce(function (a, x) { return a + x.pts.length; }, 0) + ' 个知识点 · 配套 ' + practiceCount(c) + ' 题' +
+      (csrc.book !== undefined ? '（习题 ' + (csrc.book || 0) + ' / 真题 ' + (csrc.real || 0) + ' / 扩充 ' + (csrc.extra || 0) + '）' : '') +
       (read ? ' · <span class="tag green">已读</span>' : ' · <span class="tag">未读</span>') + '</p></div>' +
       '<div class="head-actions">' +
       (c.count ? '<button class="btn btn-primary" data-act="start" data-mode="chapter" data-arg="' + cid +
@@ -217,15 +225,21 @@
       html += '<div class="card nt-body">' + d.secs.map(function (sec, si) {
         var body = '';
         if (!folded) {
-          body = '<div class="nt-pts">' + sec.pts.map(function (pt) {
-            return '<div class="nt-pt"><div class="nt-pt-t">' + e(pt.t) + '</div>' +
-              '<div class="nt-pt-d">' + e(pt.d) + '</div></div>';
+          body = '<div class="nt-pts">' + sec.pts.map(function (pt, pi) {
+            var nq = ptCount(cid, si, pi);
+            return '<div class="nt-pt"><div class="nt-pt-t">' + e(pt.t) +
+              (nq ? '<button class="nt-pt-q" data-act="nt-practice" data-arg="' + cid + ':' + si + ':' + pi +
+                '" data-title="' + e(c.title + ' · ' + pt.t) + '">相关 ' + nq + ' 题 ›</button>' : '') +
+              '</div><div class="nt-pt-d">' + e(pt.d) + '</div></div>';
           }).join('') + '</div>';
         }
         return '<div class="nt-sec' + (folded ? ' folded' : '') + '">' +
           '<div class="nt-sec-h" data-act="nt-sec" data-id="' + cid + '" data-i="' + si + '">' +
           '<span class="nt-sec-n">' + (si + 1) + '</span><b>' + e(sec.h) + '</b>' +
-          '<span class="small muted">' + sec.pts.length + ' 个知识点</span></div>' +
+          '<span class="small muted">' + sec.pts.length + ' 个知识点</span>' +
+          (secCount(cid, si) ? '<button class="nt-sec-q" data-act="nt-practice" data-arg="' + cid + ':' + si +
+            '" data-title="' + e(c.title + ' · ' + sec.h) + '">练本节 ' + secCount(cid, si) + ' 题 ›</button>' : '') +
+          '</div>' +
           body +
           (sec.key && !folded ? '<div class="nt-hint"><span>提示</span>' + e(sec.key) + '</div>' : '') +
           '</div>';

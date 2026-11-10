@@ -5,8 +5,12 @@
   var DATA = './data/';
   var KEY = 'yzt_state_v1';
 
+  var EMPTY_XREF = {
+    version: '', qmap: {}, titles: {}, secQids: {}, ptQids: {},
+    secCount: {}, ptCount: {}, chapterCount: {}, chapterChoice: {}, chapterSrc: {}, ed: {}
+  };
   Y.BANK = {
-    meta: null, points: [], templates: [], essays: [],
+    meta: null, points: [], templates: [], essays: [], xref: EMPTY_XREF,
     questions: [], byId: {}, qBySubject: {}, chapterById: {}, subjectById: {},
     loaded: 0, small: null, ready: null
   };
@@ -121,9 +125,14 @@
       meta.subjects.forEach(function (s) { B.subjectById[s.id] = s; });
       meta.chapters.forEach(function (c) { B.chapterById[c.id] = c; });
       onProgress && onProgress('读取科目与章节…', 8);
-      return Promise.all([getJSON('points.json'), getJSON('templates.json'), getJSON('essays.json')]);
+      return Promise.all([
+        getJSON('points.json'), getJSON('templates.json'), getJSON('essays.json'),
+        // 章节讲义 ↔ 题目对照表：缺失时降级为「仅按题库自带章节」，不影响刷题
+        getJSON('notes-xref.json').catch(function () { return null; })
+      ]);
     }).then(function (arr) {
       B.points = arr[0]; B.templates = arr[1]; B.essays = arr[2];
+      B.xref = arr[3] || EMPTY_XREF;
       onProgress && onProgress('装载考点与模板…', 16);
       return true;
     });
@@ -149,7 +158,33 @@
   };
   Y.q = function (id) { return Y.BANK.byId[id] || null; };
   Y.subjectOf = function (q) { return Y.BANK.subjectById[q.sub] || { name: '未知', short: '—', code: '' }; };
-  Y.chapterOf = function (q) { return q.ch ? (Y.BANK.chapterById[q.ch] || null) : null; };
+
+  /* ---------- 讲义 ↔ 题目对照（章 / 节 / 知识点三级） ---------- */
+  Y.X = function () { return Y.BANK.xref || EMPTY_XREF; };
+  Y.xrefOf = function (q) {
+    if (!q) return null;
+    var X = Y.X(), m = X.qmap && X.qmap[q.id];
+    if (!m) return null;
+    var c = Y.BANK.chapterById[m[0]] || null;
+    var ts = (X.titles && X.titles[String(m[0])]) || [];
+    return { cid: m[0], si: m[1], pi: m[2], chapter: c, sec: ts[m[1]] || '' };
+  };
+  // 题目里的「章节」：优先用题库自带 ch，统考真题等无 ch 的题目用内容对照表补出
+  Y.chapterIdOf = function (q) {
+    if (!q) return null;
+    if (q.ch) return q.ch;
+    var x = Y.xrefOf(q);
+    return x ? x.cid : null;
+  };
+  Y.chapterOf = function (q) {
+    var id = Y.chapterIdOf(q);
+    return id ? (Y.BANK.chapterById[id] || null) : null;
+  };
+  Y.xrefIds = function (key) {
+    var X = Y.X();
+    var pt = String(key).split(':').length >= 3;
+    return (pt ? X.ptQids : X.secQids)[String(key)] || [];
+  };
   Y.sourceOf = function (q) {
     var s = (Y.BANK.meta.sources || []).filter(function (x) { return x.id === q.sid; })[0];
     return s ? s.name : (q.source || '');
@@ -290,7 +325,11 @@
     var ids = [];
     switch (mode) {
       case 'ids': ids = (customIds || []).slice(); break;
-      case 'chapter': ids = choiceIds(B.questions.filter(function (q) { return q.ch === Number(arg); })); break;
+      case 'xref': {
+        ids = choiceIds(Y.xrefIds(arg).map(function (id) { return B.byId[id]; }).filter(Boolean));
+        break;
+      }
+      case 'chapter': ids = choiceIds(B.questions.filter(function (q) { return Y.chapterIdOf(q) === Number(arg); })); break;
       case 'subject': ids = choiceIds(B.qBySubject[arg] || B.questions.filter(function (q) { return (B.subjectById[q.sub] || {}).code === arg; })); break;
       case 'exam': ids = choiceIds(B.questions.filter(function (q) { return q.sid === Number(arg); })); break;
       case 'tag': ids = choiceIds(B.questions.filter(function (q) { return q.tag === arg; })); break;
@@ -320,7 +359,7 @@
       mode: mode, arg: arg, title: title || '自由刷题', ids: ids,
       index: 0, created: Date.now(), view: 'do', shuffled: false
     };
-    if (mode === 'subject' || mode === 'chapter') {
+    if (mode === 'subject' || mode === 'chapter' || mode === 'xref') {
       var first = ids.findIndex(function (id) { return !st.answers[id]; });
       if (first > 0) s.index = first;
     }

@@ -4,7 +4,7 @@
   var Y = window.YZT, V = window.Views;
   var $ = function (id) { return document.getElementById(id); };
   var TITLES = {
-    home: '学习总览', notes: '章节讲义', notesCh: '章节讲义', chapters: '章节刷题',
+    home: '学习总览', notes: '章节讲义', notesCh: '章节讲义', xref: '章节对照', chapters: '章节刷题',
     exams: '真题模考', practice: '刷题练习',
     mistakes: '错题本', review: '到期复习', favorites: '我的收藏', recite: '沉浸背诵',
     timeline: '时间轴图谱', templates: '万能模板', essays: '材料分析题', search: '全文检索',
@@ -58,7 +58,7 @@
     $('side-progress-num').textContent = stats.total ? Y.pct(stats.done, stats.total) + '%' : '';
     $('side-progress-fill').style.width = (stats.total ? Y.pct(stats.done, stats.total) : 0) + '%';
 
-    var needData = ['chapters', 'exams', 'practice', 'mistakes', 'favorites', 'review', 'search', 'report', 'essays', 'timeline', 'notes', 'notesCh'].indexOf(view) >= 0;
+    var needData = ['chapters', 'exams', 'practice', 'mistakes', 'favorites', 'review', 'search', 'report', 'essays', 'timeline', 'notes', 'notesCh', 'xref'].indexOf(view) >= 0;
     if (needData && !Y.BANK.questions.length) {
       $('view').innerHTML = '<div class="card">' + V.empty('⏳', '题库正在装载…', '首次加载约 3 MB，稍候即可开始刷题') + '</div>';
       Y.BANK.ready.then(function () { render(); });
@@ -190,6 +190,7 @@
       case 'tl':
         if (window.TL && TL.act(d)) render();
         break;
+      case 'nt-practice': startSession('xref', d.arg, d.title || '本节练习'); break;
       case 'nt':
       case 'nt-open': case 'nt-read': case 'nt-fold': case 'nt-only':
       case 'nt-sec': case 'nt-start': case 'nt-retry':

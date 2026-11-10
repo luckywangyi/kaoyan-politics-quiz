@@ -42,6 +42,7 @@
       { label: '开始学习', items: [
         { v: 'home', ico: '⌂', t: '学习总览' },
         { v: 'notes', ico: '❏', t: '章节讲义' },
+        { v: 'xref', ico: '⇄', t: '章节对照' },
         { v: 'chapters', ico: '☰', t: '章节刷题' },
         { v: 'exams', ico: '▤', t: '真题模考' },
         { v: 'practice', ico: '✍', t: '继续刷题' }
@@ -171,7 +172,8 @@
       '<div class="stat" style="padding:8px 14px"><div class="lb">正确率</div><div class="vl" style="font-size:18px">' + (done ? Y.pct(cor, done) : 0) + '%</div></div></div>' +
       startBtn('全科顺序连刷（从首道未做题继续）', 'subject', s.code, s.short + ' · 全科连刷', 'btn-primary') + '</div>';
     html += '<div class="card">' + chapters.map(function (c, i) {
-      var list = all.filter(function (q) { return q.ch === c.id; });
+      // 统考真题没有自带章节，用「讲义 ↔ 题目」对照表按内容归章，章节刷题一并覆盖
+      var list = all.filter(function (q) { return Y.chapterIdOf(q) === c.id; });
       var d = list.filter(function (q) { return S().answers[q.id]; }).length;
       var cc = list.filter(function (q) { return S().answers[q.id] && S().answers[q.id].ok === 2; }).length;
       var pp = Y.pct(d, list.length);
@@ -183,6 +185,63 @@
         '<button class="btn btn-sm btn-ghost" data-act="go" data-view="notesCh" data-id="' + c.id + '" title="先读本章讲义">读讲义</button>' +
         '<button class="btn btn-sm">' + (d ? '继续' : '去刷题') + '</button></div>';
     }).join('') + '</div>';
+    return html;
+  };
+
+  /* ---------- 章节对照：讲义 × 教材 × 题目 ---------- */
+  V.xref = function (p) {
+    var meta = B().meta, X = Y.X(), st = X.stat || {};
+    var sid = Number(p.sub || meta.subjects[0].id);
+    var chapters = meta.chapters.filter(function (c) { return c.sub === sid; });
+    var edt = X.editions || {};
+    var html = head('章节对照 · 讲义 × 教材 × 题目',
+      st.questions + ' 道题全部挂到 ' + st.chapters + ' 章 / ' + st.sections + ' 节 / ' + st.points + ' 个知识点，含按内容归章的历年真题');
+
+    html += '<div class="card card-pad xr-note">' +
+      '<div class="xr-note-h">⇄ 这一页解决什么</div>' +
+      '<div class="xr-note-b">' +
+      '左边是章节，中间是两本主流辅导书的<b>公开目录位置</b>（只对齐章名与页码，不收录原书正文），右边是本站自编讲义的知识点与题目。' +
+      '原来 15 套统考真题没有章节，现已按题干与讲义的语义重合度归到对应章节；每道题在刷题页都有「↗ 讲义」回链，每个知识点也能直接练相关题。' +
+      '</div>' +
+      '<div class="xr-note-src">' +
+      '<span>肖：' + e(edt.xiao || '《知识点精讲精练》') + '</span>' +
+      '<span>徐：' + e(edt.xu || '《核心考案》') + '</span>' +
+      '<span>' + e(edt.note || '') + '</span></div>' +
+      '</div>';
+
+    html += '<div class="chips">' + meta.subjects.map(function (x) {
+      return '<button class="chip ' + (x.id === sid ? 'on' : '') + '" data-act="go" data-view="xref" data-sub="' + x.id + '">' + e(x.short) + '</button>';
+    }).join('') + '</div>';
+
+    html += '<div class="card xr-table"><div class="xr-row xr-th">' +
+      '<div>章节</div><div>肖 · 页码</div><div>徐 · 对应章</div>' +
+      '<div>讲义结构</div><div>题目构成</div><div>操作</div></div>';
+
+    html += chapters.map(function (c) {
+      var k = String(c.id), ed = X.ed[k] || {}, sp = (X.shape || {})[k] || [0, 0, 0];
+      var src = X.chapterSrc[k] || {}, total = X.chapterCount[k] || 0;
+      var list = B().questions.filter(function (q) { return Y.chapterIdOf(q) === c.id; });
+      var done = list.filter(function (q) { return S().answers[q.id]; }).length;
+      return '<div class="xr-row">' +
+        '<div class="xr-ch"><b>' + e(c.title) + '</b>' +
+        '<div class="xr-sub">已刷 ' + done + ' / ' + list.length + ' 题</div></div>' +
+        '<div class="xr-ed">' + (ed.xp ? 'p.' + ed.xp : '—') + '<div class="xr-sub">' + e(String(ed.xc || '').slice(0, 18)) + '</div></div>' +
+        '<div class="xr-ed">' + e(String(ed.uc || '—').slice(0, 26)) +
+        (ed.split ? '<div class="xr-sub">' + e(String(ed.split).slice(0, 22)) + '</div>' : '') + '</div>' +
+        '<div class="xr-shape">' + sp[0] + ' 节 · ' + sp[1] + ' 点<div class="xr-sub">' + sp[2] + ' 条必背</div></div>' +
+        '<div class="xr-q"><b>' + total + '</b> 题<div class="xr-sub">' +
+        '习题 ' + (src.book || 0) + ' · 真题 ' + (src.real || 0) + ' · 扩充 ' + (src.extra || 0) + '</div></div>' +
+        '<div class="xr-act">' +
+        '<button class="btn btn-sm btn-ghost" data-act="go" data-view="notesCh" data-id="' + c.id + '">读讲义</button>' +
+        '<button class="btn btn-sm" data-act="start" data-mode="chapter" data-arg="' + c.id + '" data-title="' + e(c.title) + '">练本章</button>' +
+        '</div></div>';
+    }).join('') + '</div>';
+
+    html += '<div class="card card-pad xr-note" style="margin-top:16px">' +
+      '<div class="xr-note-h">关于对应关系</div><div class="xr-note-b">' +
+      '练习题沿用题库原有章节；真题与扩充题按题干、选项、解析同讲义小节的关键词重合度自动归章，属于<b>复习导航</b>而非官方知识点编号。' +
+      '一道题可能同时关联多个知识点，刷题页的「↗ 讲义」指向匹配度最高的那一节。' +
+      '</div></div>';
     return html;
   };
 
@@ -212,6 +271,7 @@
     var key = Y.answerKey(q);
     var isFav = S().favorites.indexOf(q.id) >= 0;
     var subj = sub(q.sub);
+    var xr = Y.xrefOf(q);
 
     var html = '<div class="practice"><div class="pr-top">' +
       '<button class="icon-btn" data-act="back" title="返回">←</button>' +
@@ -224,6 +284,8 @@
 
     html += '<div class="qcard"><div class="qmeta">' + typeTag(q) + statusTag(q) +
       '<span class="tag">' + e(subj.short) + '</span><span class="tag">' + e(chTitle(q)) + '</span>' +
+      (xr ? '<button class="tag xr-link" data-act="go" data-view="notesCh" data-id="' + xr.cid +
+        '" title="回到本题对应的讲义小节">↗ 讲义 · ' + e(String(xr.sec || '本章').slice(0, 12)) + '</button>' : '') +
       '<span class="tag">' + e(q.tag) + '</span>' +
       (q.year ? '<span class="tag">' + q.year + ' 年</span>' : '') +
       (S().mistakes[q.id] && S().mistakes[q.id].count ? '<span class="tag amber">历史失误 ' + S().mistakes[q.id].count + ' 次</span>' : '') +
