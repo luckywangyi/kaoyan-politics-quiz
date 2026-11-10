@@ -503,3 +503,28 @@ mark{background:var(--amber-soft);color:var(--amber);padding:0 2px;border-radius
 .tl-banner.nt-banner{background:linear-gradient(96deg,var(--navy-soft) 0%,var(--surface) 62%)}
 .tl-banner.nt-banner:hover{border-color:var(--navy);box-shadow:0 8px 22px rgba(30,58,95,.14)}
 .tl-banner.nt-banner .tl-banner-go{color:var(--navy)}
+
+/* 教材对应 */
+.nt-intro{margin:0 0 16px;padding:13px 16px;border-radius:var(--r-sm);background:var(--surface2);
+  border:1px solid var(--line);border-left:3px solid var(--blue)}
+.nt-intro-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin-bottom:6px}
+.nt-intro .nt-ic{background:var(--blue-soft);color:var(--blue)}
+.nt-intro .small{line-height:1.8}
+.nt-intro b{color:var(--text);font-weight:700}
+.nt-pg{color:var(--blue);font-variant-numeric:tabular-nums}
+
+.nt-xref{margin:0 0 14px;padding:12px 15px;border-radius:var(--r-sm);background:var(--surface2);
+  border:1px solid var(--line);border-left:3px solid var(--blue)}
+.nt-xref-h{font-size:11.5px;font-weight:700;color:var(--blue);letter-spacing:.4px;margin-bottom:8px}
+.nt-xref-row{display:flex;align-items:baseline;gap:9px;padding:3px 0;font-size:12.5px;line-height:1.7}
+.nt-xref-tag{flex:none;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.3px}
+.nt-xref-tag.xiao{background:var(--brand-soft);color:var(--brand)}
+.nt-xref-tag.xu{background:var(--amber-soft);color:var(--amber)}
+.nt-xref-txt{flex:1;min-width:0;color:var(--text)}
+.nt-xref-pg{flex:none;font-size:11.5px;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
+.nt-xref-note{margin-top:7px;padding-top:7px;border-top:1px dashed var(--line);
+  font-size:12px;line-height:1.75;color:var(--text2)}
+@media(max-width:600px){
+  .nt-xref-row{flex-wrap:wrap;gap:6px}
+  .nt-xref-txt{flex:1 1 100%;order:2}
+}

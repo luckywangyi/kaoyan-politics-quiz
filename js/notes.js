@@ -98,6 +98,13 @@
         return '<button class="chip ' + (x.id === sid ? 'on' : '') + '" data-act="go" data-view="notes" data-sub="' + x.id + '">' + e(x.short) + '</button>';
       }).join('') + '</div>';
 
+    html += '<div class="nt-intro">' +
+      '<div class="nt-intro-h"><span class="nt-ic">⇄</span>章节体系与教材对应</div>' +
+      '<div class="small muted">站内 53 章与<b>考试大纲解析</b>、<b>肖秀荣《知识点精讲精练》</b>逐章一一对应，' +
+      '每章标注起始页码，可直接翻书对照；<b>徐涛《核心考案》</b>在毛中特、习思想、史纲、思修四科章号章名完全一致，' +
+      '仅马原把哲学部分拆为「辩证唯物论 / 唯物辩证法 / 认识论 / 唯物史观」四章，对应关系写在每章页头。</div>' +
+      '</div>';
+
     if (!N.index) {
       if (!N.pIndex) loadIndex().then(rerender).catch(rerender);
       html += N.err ? errCard(N.err) : loadingCard('讲义目录加载中…');
@@ -129,7 +136,8 @@
           return '<div class="nt-row' + (read ? ' read' : '') + '" data-act="nt-open" data-id="' + c.id + '">' +
             '<div class="idx">' + (i + 1) + '</div>' +
             '<div class="info"><b>' + e(c.title) + '</b>' +
-            '<div class="meta">' + info.secs + ' 节 · ' + info.pts + ' 个知识点 · ' + (info.keys || 0) + ' 条必背 · 配套 ' + practiceCount(c) + ' 题</div></div>' +
+            '<div class="meta">' + info.secs + ' 节 · ' + info.pts + ' 个知识点 · ' + (info.keys || 0) + ' 条必背 · 配套 ' + practiceCount(c) + ' 题' +
+            (info.xp ? ' · <span class="nt-pg">肖 p.' + info.xp + '</span>' : '') + '</div></div>' +
             '<div class="nt-badge">' + (read ? '<span class="tag green">已读</span>' : '<span class="tag">未读</span>') + '</div>' +
             '<button class="btn btn-sm">' + (read ? '复习' : '读讲义') + '</button></div>';
         }).join('') + '</div></div>';
@@ -175,6 +183,20 @@
       (c.count ? '<button class="btn btn-primary" data-act="start" data-mode="chapter" data-arg="' + cid +
         '" data-title="' + e(c.title) + '">开始刷本章 ' + practiceCount(c) + ' 题</button>' : '') +
       '</div></div>';
+
+    /* 教材对应 */
+    var xr = (N.index && N.index.chapters[String(cid)]) || {};
+    if (xr.xc || xr.uc) {
+      html += '<div class="nt-xref">' +
+        '<div class="nt-xref-h">⇄ 教材对应位置</div>' +
+        '<div class="nt-xref-row"><span class="nt-xref-tag xiao">肖秀荣</span>' +
+        '<span class="nt-xref-txt">' + e(xr.xc || '—') + '</span>' +
+        (xr.xp ? '<span class="nt-xref-pg">p.' + xr.xp + '</span>' : '') + '</div>' +
+        '<div class="nt-xref-row"><span class="nt-xref-tag xu">徐涛</span>' +
+        '<span class="nt-xref-txt">' + e(xr.uc || '—') + '</span></div>' +
+        (xr.split ? '<div class="nt-xref-note">' + e(xr.split) + '</div>' : '') +
+        '</div>';
+    }
 
     /* 工具条 */
     html += '<div class="nt-tools">' +
