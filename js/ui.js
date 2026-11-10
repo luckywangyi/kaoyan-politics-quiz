@@ -41,6 +41,7 @@
     var groups = [
       { label: '开始学习', items: [
         { v: 'home', ico: '⌂', t: '学习总览' },
+        { v: 'notes', ico: '❏', t: '章节讲义' },
         { v: 'chapters', ico: '☰', t: '章节刷题' },
         { v: 'exams', ico: '▤', t: '真题模考' },
         { v: 'practice', ico: '✍', t: '继续刷题' }
@@ -96,6 +97,12 @@
       quick('✎', '肖四大题', '智能采分对比', 'essays') +
       quick('★', '我的收藏', st.favorites + ' 道已收藏', 'favorites') +
       '</div>' +
+      '<button class="tl-banner nt-banner" data-act="go" data-view="notes">' +
+      '<span class="tl-banner-em">❏</span>' +
+      '<span class="tl-banner-txt"><b>章节讲义 · 先读后练</b>' +
+      '<span>' + meta.stats.chapters + ' 章全覆盖 · 587 个知识点，每章含知识点讲解 / 重点梳理 / 易混辨析 / 配套练习（已读 ' +
+      Object.keys(S().notes || {}).length + ' 章）</span></span>' +
+      '<span class="tl-banner-go">去通读 →</span></button>' +
       '<button class="tl-banner" data-act="go" data-view="timeline">' +
       '<span class="tl-banner-em">⌛</span>' +
       '<span class="tl-banner-txt"><b>时间轴记忆图谱</b>' +
@@ -173,6 +180,7 @@
         '<div class="idx">' + (i + 1) + '</div><div class="info"><b>' + e(c.title) + '</b>' +
         '<div class="meta">' + list.length + ' 题 · 已刷 ' + d + ' · 正确率 ' + (d ? Y.pct(cc, d) + '%' : '—') + ' ' + status + '</div></div>' +
         '<div class="bar">' + pctBar(pp, pp >= 100 ? 'green' : '') + '</div>' +
+        '<button class="btn btn-sm btn-ghost" data-act="go" data-view="notesCh" data-id="' + c.id + '" title="先读本章讲义">读讲义</button>' +
         '<button class="btn btn-sm">' + (d ? '继续' : '去刷题') + '</button></div>';
     }).join('') + '</div>';
     return html;
@@ -656,6 +664,10 @@
       statBox('真题卷', meta.stats.examPapers) + statBox('背诵考点', meta.stats.knowledgePoints) +
       statBox('答题模板', meta.stats.templates) + '</div>' +
       '<div class="divider"></div><div class="small muted">' +
+      '章节讲义：' + meta.stats.chapters + ' 章全覆盖，含知识点讲解 / 重点梳理 / 易混辨析 / 记忆口诀 / 配套练习。' +
+      '讲义为依据教育部考试大纲与统编教材章节体系自编，<b>不含徐涛核心教案、肖秀荣系列等商业出版物的原文</b>，' +
+      '与这两套资料共用同一套考纲，但表述为独立撰写；固定表述与数字请以官方原文和大纲为准。' +
+      '</div><div class="divider"></div><div class="small muted">' +
       '来源标签（可在首页按标签专项练习）：' + meta.tags.map(function (t) { return '<span class="tag" style="margin:2px">' + e(t) + '</span>'; }).join('') +
       '<br>补充题共 ' + meta.extraCount + ' 道：2026 时政 42 道（依据新华社公报、中国人大网等官方原文编写）、习思想新表述加练 26 道、近年真题回忆版 6 道，另有 45 道旧版时政题。' +
       '<br>2027 大纲时政考查范围为 2026 年 1—12 月；标签「2025时政特训」及部分「2026时政更新」涉及 2025 年事件，解析内已附范围提示，仅供知识点练习。' +

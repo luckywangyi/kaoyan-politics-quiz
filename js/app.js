@@ -4,7 +4,8 @@
   var Y = window.YZT, V = window.Views;
   var $ = function (id) { return document.getElementById(id); };
   var TITLES = {
-    home: '学习总览', chapters: '章节刷题', exams: '真题模考', practice: '刷题练习',
+    home: '学习总览', notes: '章节讲义', notesCh: '章节讲义', chapters: '章节刷题',
+    exams: '真题模考', practice: '刷题练习',
     mistakes: '错题本', review: '到期复习', favorites: '我的收藏', recite: '沉浸背诵',
     timeline: '时间轴图谱', templates: '万能模板', essays: '材料分析题', search: '全文检索',
     report: '学习报告', settings: '设置'
@@ -57,7 +58,7 @@
     $('side-progress-num').textContent = stats.total ? Y.pct(stats.done, stats.total) + '%' : '';
     $('side-progress-fill').style.width = (stats.total ? Y.pct(stats.done, stats.total) : 0) + '%';
 
-    var needData = ['chapters', 'exams', 'practice', 'mistakes', 'favorites', 'review', 'search', 'report', 'essays', 'timeline'].indexOf(view) >= 0;
+    var needData = ['chapters', 'exams', 'practice', 'mistakes', 'favorites', 'review', 'search', 'report', 'essays', 'timeline', 'notes', 'notesCh'].indexOf(view) >= 0;
     if (needData && !Y.BANK.questions.length) {
       $('view').innerHTML = '<div class="card">' + V.empty('⏳', '题库正在装载…', '首次加载约 3 MB，稍候即可开始刷题') + '</div>';
       Y.BANK.ready.then(function () { render(); });
@@ -181,7 +182,7 @@
     switch (act) {
       case 'go': {
         var params = {};
-        ['sub', 'cat', 'i', 'ym', 'd', 'q', 'type', 'm'].forEach(function (k) { if (d[k] !== undefined) params[k] = d[k]; });
+        ['sub', 'cat', 'i', 'ym', 'd', 'q', 'type', 'm', 'id'].forEach(function (k) { if (d[k] !== undefined) params[k] = d[k]; });
         go(d.view, params);
         break;
       }
@@ -189,6 +190,12 @@
       case 'tl':
         if (window.TL && TL.act(d)) render();
         break;
+      case 'nt':
+      case 'nt-open': case 'nt-read': case 'nt-fold': case 'nt-only':
+      case 'nt-sec': case 'nt-start': case 'nt-retry':
+        if (V.notesAct && V.notesAct(d)) render();
+        break;
+      case 'nt-dummy': break;
       case 'close-sheet': closeSheet(); break;
       case 'confirm-ok': {
         var fn = pendingConfirm; pendingConfirm = null; closeSheet();
@@ -432,6 +439,10 @@
   });
 
   window.addEventListener('hashchange', render);
+
+  /* ---------- 供其它模块调用 ---------- */
+  Y.rerender = render;
+  window.__yztStart = startSession;
 
   /* ---------- 启动 ---------- */
   (function boot() {

@@ -66,6 +66,7 @@
       recite: {},       // kpid -> {level, rep, ef, interval, due}
       daily: {},        // YYYY-MM-DD -> {n,r,c,t}
       essays: {},       // qid -> {text, score, hit}
+      notes: {},        // chapterId -> {t} 讲义已读标记
       plan: { quota: 30, examDate: '2026-12-19' },
       settings: { theme: 'light' },
       session: null,

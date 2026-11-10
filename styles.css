@@ -404,3 +404,102 @@ mark{background:var(--amber-soft);color:var(--amber);padding:0 2px;border-radius
   .tl-banner-txt span{display:none}
   .tl-banner-go{font-size:11.5px}
 }
+
+/* ============ 章节讲义 ============ */
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid var(--line2);border-top-color:var(--brand);display:inline-block;animation:ntspin .8s linear infinite;flex:none}
+@keyframes ntspin{to{transform:rotate(360deg)}}
+
+.nt-group{margin-bottom:18px}
+.nt-ghead{display:flex;align-items:baseline;gap:10px;margin:0 0 8px 2px;flex-wrap:wrap}
+.nt-ghead b{font-size:13.5px;color:var(--text)}
+.nt-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);transition:.15s;cursor:pointer}
+.nt-row:last-child{border-bottom:none}
+.nt-row:hover{background:var(--surface2)}
+.nt-row .idx{width:30px;height:30px;border-radius:8px;background:var(--surface3);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--text2);flex:none}
+.nt-row.read .idx{background:var(--green-soft);color:var(--green)}
+.nt-row .info{flex:1;min-width:0}
+.nt-row .info b{font-size:13.5px;line-height:1.5}
+.nt-row .info .meta{font-size:11.5px;color:var(--text2);margin-top:3px}
+.nt-badge{flex:none}
+@media(max-width:600px){
+  .nt-row{flex-wrap:wrap;gap:8px}
+  .nt-badge{display:none}
+  .nt-row .info{flex:1 1 100%;order:2}
+  .nt-row .idx{order:1}
+  .nt-row .btn{order:3;margin-left:auto}
+}
+
+/* 工具条 */
+.nt-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.nt-tools .chip{white-space:nowrap}
+
+/* 本章定位 */
+.nt-ov{position:relative;background:var(--navy-soft);border:1px solid var(--line);border-left:3px solid var(--navy);
+  border-radius:var(--r-sm);padding:14px 16px 14px 16px;font-size:13px;line-height:1.78;color:var(--text);margin-bottom:16px}
+.nt-ov-lb{display:block;font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.5px;margin-bottom:6px}
+
+/* 正文 */
+.nt-body{padding:8px 20px 18px;margin-bottom:16px;max-width:none}
+.nt-sec{padding:14px 0;border-bottom:1px dashed var(--line)}
+.nt-sec:last-child{border-bottom:none}
+.nt-sec-h{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.nt-sec-h b{font-size:14.5px;line-height:1.5;flex:1}
+.nt-sec-h:hover b{color:var(--brand)}
+.nt-sec-n{width:22px;height:22px;border-radius:6px;background:var(--brand-soft);color:var(--brand);
+  font-size:11.5px;font-weight:700;display:grid;place-items:center;flex:none}
+.nt-sec.folded .nt-pts,.nt-sec.folded .nt-hint{display:none}
+.nt-pts{margin-top:10px}
+.nt-pt{display:grid;grid-template-columns:106px minmax(0,1fr);gap:12px;padding:7px 0}
+.nt-pt-t{font-size:12.5px;font-weight:700;color:var(--brand2);line-height:1.7;word-break:break-word}
+.nt-pt-d{font-size:13.5px;line-height:1.82;color:var(--text)}
+.nt-hint{margin-top:10px;background:var(--amber-soft);border-radius:var(--r-sm);padding:10px 13px;
+  font-size:12.5px;line-height:1.72;color:var(--text)}
+.nt-hint span{display:inline-block;font-size:10.5px;font-weight:700;color:var(--amber);
+  border:1px solid var(--amber);border-radius:4px;padding:0 5px;margin-right:7px;vertical-align:1px}
+@media(max-width:640px){
+  .nt-body{padding:6px 14px 14px}
+  .nt-pt{grid-template-columns:1fr;gap:2px}
+  .nt-pt-t{font-size:12px}
+  .nt-pt-d{font-size:13px;line-height:1.78}
+}
+
+/* 重点 / 易混 */
+.nt-block{padding:16px 18px;margin-bottom:16px}
+.nt-block-h{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;margin-bottom:12px}
+.nt-block-h .small{font-weight:400;margin-left:auto}
+.nt-ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:12px;
+  background:var(--brand-soft);color:var(--brand);flex:none}
+.nt-keys{margin:0;padding-left:0;list-style:none;counter-reset:ntk}
+.nt-keys li{position:relative;padding:6px 0 6px 30px;font-size:13px;line-height:1.78;color:var(--text);border-bottom:1px dotted var(--line)}
+.nt-keys li:last-child{border-bottom:none}
+.nt-keys li::before{counter-increment:ntk;content:counter(ntk);position:absolute;left:0;top:8px;
+  width:19px;height:19px;border-radius:5px;background:var(--surface3);color:var(--text2);
+  font-size:10.5px;font-weight:700;display:grid;place-items:center}
+
+.nt-confuse{display:flex;flex-direction:column;gap:10px}
+.nt-cf{background:var(--surface2);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 13px}
+.nt-cf-pair{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;margin-bottom:5px}
+.nt-cf-pair b{color:var(--purple)}
+.nt-cf-pair i{font-style:normal;font-size:10.5px;font-weight:700;color:var(--text3);
+  border:1px solid var(--line2);border-radius:4px;padding:0 5px}
+.nt-cf-d{font-size:12.5px;line-height:1.72;color:var(--text2)}
+
+/* 口诀 / 建议 */
+.nt-mn{position:relative;margin-bottom:16px;padding:14px 18px;border-radius:var(--r-sm);
+  background:linear-gradient(96deg,var(--brand-soft) 0%,var(--surface) 78%);
+  border:1px solid var(--line);border-left:3px solid var(--brand);
+  font-size:14px;font-weight:700;line-height:1.7;color:var(--text);letter-spacing:.3px}
+.nt-mn-lb{display:block;font-size:10.5px;font-weight:700;color:var(--brand);letter-spacing:1px;margin-bottom:5px}
+.nt-tip{padding:14px 18px;border-radius:var(--r-sm);background:var(--green-soft);
+  border:1px solid var(--line);border-left:3px solid var(--green);
+  font-size:12.5px;line-height:1.8;color:var(--text);margin-bottom:18px}
+.nt-tip-lb{display:block;font-size:10.5px;font-weight:700;color:var(--green);letter-spacing:1px;margin-bottom:5px}
+
+/* 底部 */
+.nt-foot{display:flex;gap:10px;flex-wrap:wrap;padding:18px 0 4px;margin-bottom:24px;
+  border-top:1px solid var(--line)}
+
+/* 首页 · 章节讲义通栏入口（复用 tl-banner 结构，换海军蓝配色） */
+.tl-banner.nt-banner{background:linear-gradient(96deg,var(--navy-soft) 0%,var(--surface) 62%)}
+.tl-banner.nt-banner:hover{border-color:var(--navy);box-shadow:0 8px 22px rgba(30,58,95,.14)}
+.tl-banner.nt-banner .tl-banner-go{color:var(--navy)}
