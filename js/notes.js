@@ -156,6 +156,52 @@
     return '<div class="progress"><i style="width:' + Y.clamp(v, 0, 100) + '%"></i></div>';
   }
 
+  /* ---------- 2027 大纲考点清单（以官方考查要点为骨架） ---------- */
+  function syllabusBlock(cid, c) {
+    var sy = Y.syllabusOf(cid);
+    if (!sy || !sy.sections || !sy.sections.length) return '';
+    var ed = sy.ed || {};
+    var total = sy.sections.reduce(function (a, s) { return a + (s.items || []).length; }, 0);
+    var SY = Y.SY();
+    var srcBits = [];
+    if (ed.xp) srcBits.push('<span>肖《精讲精练》 p.' + e(ed.xp) + '</span>');
+    if (ed.xk) srcBits.push('<span>肖考点 ' + e(ed.xk) + '</span>');
+    if (ed.hp) srcBits.push('<span>核心考案 ' + e(ed.hp) + '</span>');
+    if (ed.hk) srcBits.push('<span>考点 ' + e(ed.hk) + '</span>');
+    if (ed.lec) srcBits.push('<span>徐涛 ' + e(ed.lec) + '</span>');
+    if (ed.uc) srcBits.push('<span>对应 ' + e(String(ed.uc).slice(0, 40)) + '</span>');
+
+    var html = '<div class="card sy-block">' +
+      '<div class="sy-head"><span class="sy-ic">纲</span><div class="sy-head-t">' +
+      '<b>2027 大纲考点清单</b><div class="small muted">' + e(SY.source || '') + ' · ' +
+      sy.sections.length + ' 节 / ' + total + ' 个考点，每条挂配套题</div></div></div>' +
+      (srcBits.length ? '<div class="sy-src">' + srcBits.join('') + '</div>' : '') +
+      '<div class="sy-note">章节骨架按官方大纲逐条重排，教材栏为两本书<b>公开目录的页码 / 考点编号 / 讲次</b>；' +
+      '「讲义精讲」取本站讲义对应段落，「真题要点」由本站题库自带的解析归纳，均不含两书正文。</div>';
+
+    html += sy.sections.map(function (sec, si) {
+      var qs = Y.syllabusIds(cid + ':' + si);
+      return '<details class="sy-sec" open><summary>' +
+        '<span class="sy-sec-n">' + (si + 1) + '</span><b>' + e(sec.h) + '</b>' +
+        '<span class="small muted">' + sec.items.length + ' 个考点</span>' +
+        (qs.length ? '<button class="btn btn-sm btn-ghost sy-practice" data-act="start" data-mode="syl" data-arg="' +
+          cid + ':' + si + '" data-title="' + e(c.title + ' · ' + sec.h) + '">练本节 ' + qs.length + ' 题 ›</button>' : '') +
+        '</summary><div class="sy-items">' + (sec.items || []).map(function (it, pi) {
+          var n = (it.qids || []).length;
+          var body = '';
+          if (it.nd) body += '<div class="sy-lb">讲义精讲</div><p>' + e(it.nd) + '</p>';
+          if (it.d) body += '<div class="sy-lb sy-lb2">真题要点' +
+            (it.src === 'bankraw' ? ' · 解析摘录' : ' · 解析归纳') + '</div><p>' + e(it.d) + '</p>';
+          if (!body) body = '<p class="muted">此考点暂无可归纳的解析要点，直接做下方配套题看完整解析。</p>';
+          return '<div class="sy-item"><div class="sy-item-h"><span class="sy-dot"></span><b>' + e(it.t) + '</b>' +
+            (n ? '<button class="sy-item-q" data-act="start" data-mode="syl" data-arg="' + cid + ':' + si + ':' + pi +
+              '" data-title="' + e(c.title + ' · ' + it.t) + '">练 ' + n + ' 题 ›</button>' : '') +
+            '</div><div class="sy-item-body">' + body + '</div></div>';
+        }).join('') + '</div></details>';
+    }).join('') + '</div>';
+    return html;
+  }
+
   /* ---------- 单章讲义 ---------- */
   V.notesCh = function (p) {
     var cid = Number(p.id);
@@ -181,10 +227,13 @@
     var prev = at > 0 ? list[at - 1] : null;
     var next = at >= 0 && at < list.length - 1 ? list[at + 1] : null;
     var csrc = (X().chapterSrc || {})[String(cid)] || {};
+    var sy = Y.syllabusOf(cid);
+    var syN = sy ? sy.sections.reduce(function (a, x) { return a + (x.items || []).length; }, 0) : 0;
 
     var html = '<div class="page-head"><div><h1>' + e(c.title) + '</h1>' +
       '<p>' + e(s.name) + ' · ' + d.secs.length + ' 节 · ' +
-      d.secs.reduce(function (a, x) { return a + x.pts.length; }, 0) + ' 个知识点 · 配套 ' + practiceCount(c) + ' 题' +
+      d.secs.reduce(function (a, x) { return a + x.pts.length; }, 0) + ' 个知识点' +
+      (syN ? ' · 大纲 ' + syN + ' 考点' : '') + ' · 配套 ' + practiceCount(c) + ' 题' +
       (csrc.book !== undefined ? '（习题 ' + (csrc.book || 0) + ' / 真题 ' + (csrc.real || 0) + ' / 扩充 ' + (csrc.extra || 0) + '）' : '') +
       (read ? ' · <span class="tag green">已读</span>' : ' · <span class="tag">未读</span>') + '</p></div>' +
       '<div class="head-actions">' +
@@ -205,6 +254,9 @@
         (xr.split ? '<div class="nt-xref-note">' + e(xr.split) + '</div>' : '') +
         '</div>';
     }
+
+    /* 以大纲考点为骨架的讲义层 */
+    html += syllabusBlock(cid, c);
 
     /* 工具条 */
     html += '<div class="nt-tools">' +

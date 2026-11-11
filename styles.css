@@ -564,3 +564,51 @@ mark{background:var(--amber-soft);color:var(--amber);padding:0 2px;border-radius
   .xr-th>div:nth-child(2),.xr-th>div:nth-child(3),.xr-th>div:nth-child(4){display:none}
   .xr-act{flex-direction:column}
 }
+
+/* ============ 2027 大纲考点讲义层 ============ */
+.sy-block{padding:0;margin-bottom:16px;overflow:hidden}
+.sy-head{display:flex;gap:12px;align-items:center;padding:15px 18px;background:var(--surface3);border-bottom:1px solid var(--line)}
+.sy-ic{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  background:var(--brand);color:#fff;font-size:14px;font-weight:800}
+.sy-head-t{flex:1;min-width:0}
+.sy-head-t b{font-size:14.5px;color:var(--text);letter-spacing:.3px}
+.sy-head-t .small{margin-top:3px;line-height:1.6}
+.sy-src{display:flex;flex-wrap:wrap;gap:6px 8px;padding:11px 18px 0}
+.sy-src span{font-size:11px;line-height:1.6;color:var(--brand2);background:var(--blue-soft);
+  border-radius:5px;padding:3px 8px;max-width:100%;overflow-wrap:anywhere}
+.sy-note{padding:9px 18px 13px;font-size:12px;line-height:1.8;color:var(--text2)}
+.sy-note b{color:var(--brand2)}
+.sy-sec{border-top:1px solid var(--line)}
+.sy-sec>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;user-select:none}
+.sy-sec>summary::-webkit-details-marker{display:none}
+.sy-sec>summary::after{content:'⌄';margin-left:2px;color:var(--text3);font-size:15px;transition:transform .15s}
+.sy-sec:not([open])>summary::after{transform:rotate(-90deg)}
+.sy-sec>summary:hover{background:var(--surface2)}
+.sy-sec>summary b{font-size:13.5px;color:var(--text);flex:1;min-width:0;line-height:1.5}
+.sy-sec-n{flex:none;width:21px;height:21px;border-radius:6px;display:grid;place-items:center;
+  background:var(--brand-soft,var(--blue-soft));color:var(--brand);font-size:11px;font-weight:800}
+.sy-practice{flex:none;white-space:nowrap}
+.sy-items{padding:0 18px 14px 46px}
+.sy-item{padding:10px 0 10px 12px;border-left:2px solid var(--line)}
+.sy-item+.sy-item{border-top:1px dashed var(--line)}
+.sy-item-h{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;line-height:1.6}
+.sy-item-h b{flex:1;min-width:0;color:var(--brand2);font-weight:700}
+.sy-dot{flex:none;width:5px;height:5px;border-radius:50%;background:var(--brand);margin-top:8px}
+.sy-item-q{flex:none;border:0;background:transparent;color:var(--blue);font-size:11px;font-weight:700;
+  cursor:pointer;padding:0 0 0 8px;white-space:nowrap}
+.sy-item-q:hover{text-decoration:underline}
+.sy-item-body{padding-left:12px;font-size:12.5px;line-height:1.85;color:var(--text)}
+.sy-item-body p{margin:3px 0 7px}
+.sy-lb{display:inline-block;font-size:10.5px;font-weight:700;color:var(--brand);background:var(--blue-soft);
+  border-radius:4px;padding:1px 6px;margin-top:4px}
+.sy-lb2{color:var(--text2);background:var(--surface3)}
+@media(max-width:760px){
+  .sy-head,.sy-sec>summary{padding:11px 13px}
+  .sy-src,.sy-note{padding-left:13px;padding-right:13px}
+  .sy-items{padding:0 13px 12px 20px}
+  .sy-item-body{padding-left:0}
+  .sy-practice{display:none}
+}
+/* 大纲总览表：教材对应列单行省略，避免挤占进度列 */
+.sy-table .xr-ed,.sy-table .xr-ed .xr-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.sy-table .xr-ch b,.sy-table .xr-shape,.sy-table .xr-q{overflow-wrap:anywhere}

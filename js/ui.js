@@ -42,6 +42,7 @@
       { label: '开始学习', items: [
         { v: 'home', ico: '⌂', t: '学习总览' },
         { v: 'notes', ico: '❏', t: '章节讲义' },
+        { v: 'syllabus', ico: '纲', t: '大纲考点' },
         { v: 'xref', ico: '⇄', t: '章节对照' },
         { v: 'chapters', ico: '☰', t: '章节刷题' },
         { v: 'exams', ico: '▤', t: '真题模考' },
@@ -189,6 +190,73 @@
   };
 
   /* ---------- 章节对照：讲义 × 教材 × 题目 ---------- */
+  /* ---------- 2027 大纲考点总览 ---------- */
+  V.syllabus = function (p) {
+    var meta = B().meta, SY = Y.SY(), st = SY.stat || {};
+    var sid = Number(p.sub || meta.subjects[0].id);
+    var chapters = meta.chapters.filter(function (c) { return c.sub === sid; });
+    var editions = SY.editions || {};
+    var html = head('2027 大纲考点 · 讲义总览',
+      (st.chapters || 0) + ' 章 / ' + (st.sections || 0) + ' 节 / ' + (st.items || 0) +
+      ' 个官方考点，逐条挂讲义精讲、真题要点与配套题');
+
+    html += '<div class="card card-pad xr-note">' +
+      '<div class="xr-note-h">⇄ 这一层讲义是怎么写出来的</div>' +
+      '<div class="xr-note-b">' +
+      '章节、分节、考点名称逐条取自 <b>' + e(SY.source || '2027 考试大纲') + '</b>——两本辅导书都按大纲考点化编排，' +
+      '因此按大纲重排即与两书章节体系对齐；表内另标注两本书<b>公开目录中的页码、考点编号区间、徐涛讲次与对应章</b>，供在自己正版书里定位。' +
+      '每个考点的「讲义精讲」来自本站讲义对应段落、「真题要点」由站内 1968 题自带的解析归纳，' +
+      '<b>不收录《核心考案》《精讲精练》正文</b>。' +
+      '</div><div class="xr-note-src">' +
+      '<span>肖：' + e(editions.xiao || '《知识点精讲精练》2027') + '</span>' +
+      '<span>徐：' + e(editions.xu || '《核心考案》2027') + '</span>' +
+      '<span>' + e(editions.note || '') + '</span></div></div>';
+
+    html += '<div class="chips">' + meta.subjects.map(function (x) {
+      return '<button class="chip ' + (x.id === sid ? 'on' : '') + '" data-act="go" data-view="syllabus" data-sub="' + x.id + '">' + e(x.short) + '</button>';
+    }).join('') + '</div>';
+
+    html += '<div class="card xr-table sy-table"><div class="xr-row xr-th">' +
+      '<div>章节</div><div>大纲结构</div><div>肖 · 页码 / 考点</div>' +
+      '<div>徐涛 · 对应章 / 讲次</div><div>讲义与进度</div><div>操作</div></div>';
+
+    html += chapters.map(function (c) {
+      var sy = Y.syllabusOf(c.id) || { sections: [], ed: {} };
+      var ed = sy.ed || {};
+      var items = sy.sections.reduce(function (a, s) { return a + (s.items || []).length; }, 0);
+      var withText = sy.sections.reduce(function (a, s) {
+        return a + (s.items || []).filter(function (it) { return it.nd || it.d; }).length;
+      }, 0);
+      var list = B().questions.filter(function (q) { return Y.chapterIdOf(q) === c.id; });
+      var done = list.filter(function (q) { return S().answers[q.id]; }).length;
+      return '<div class="xr-row">' +
+        '<div class="xr-ch"><b>' + e(c.title) + '</b>' +
+        '<div class="xr-sub">' + e(sub(c.sub).short) + ' · 第 ' + c.id + ' 章</div></div>' +
+        '<div class="xr-shape"><b>' + sy.sections.length + '</b> 节 · <b>' + items + '</b> 考点' +
+        '<div class="xr-sub">官方考查要点逐条</div></div>' +
+        '<div class="xr-ed">' + (ed.xp ? 'p.' + e(ed.xp) : '—') +
+        (ed.xk ? '<div class="xr-sub">考点 ' + e(ed.xk) + '</div>' : '') +
+        (ed.hp ? '<div class="xr-sub">核心考案 ' + e(ed.hp) + '</div>' : '') + '</div>' +
+        '<div class="xr-ed">' + e(String(ed.uc || '—').slice(0, 22)) +
+        (ed.lec ? '<div class="xr-sub">' + e(String(ed.lec).slice(0, 20)) + '</div>' : '') + '</div>' +
+        '<div class="xr-q"><b>' + done + '</b> / ' + list.length + ' 题已刷' +
+        '<div class="xr-sub">' + withText + ' / ' + items + ' 考点有讲解</div></div>' +
+        '<div class="xr-act">' +
+        '<button class="btn btn-sm btn-ghost" data-act="go" data-view="notesCh" data-id="' + c.id + '">看考点</button>' +
+        '<button class="btn btn-sm" data-act="start" data-mode="syl" data-arg="' + c.id +
+        '" data-title="' + e(c.title + ' · 大纲考点') + '">练考点</button>' +
+        '</div></div>';
+    }).join('') + '</div>';
+
+    html += '<div class="card card-pad xr-note" style="margin-top:16px">' +
+      '<div class="xr-note-h">使用建议</div><div class="xr-note-b">' +
+      '点「看考点」进入该章讲义：顶部是按大纲逐条列出的考点清单，每条都有精讲、真题要点与配套题；' +
+      '下面是按同一章重排的讲义正文、重点梳理与易混辨析。点「练考点」则直接组一套该章所有大纲考点对应的题目。' +
+      '页码与讲次按 2027 版公开目录整理，不同印次可能有数页偏差，以手上的正版书为准。' +
+      '</div></div>';
+    return html;
+  };
+
   V.xref = function (p) {
     var meta = B().meta, X = Y.X(), st = X.stat || {};
     var sid = Number(p.sub || meta.subjects[0].id);

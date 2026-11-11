@@ -9,8 +9,9 @@
     version: '', qmap: {}, titles: {}, secQids: {}, ptQids: {},
     secCount: {}, ptCount: {}, chapterCount: {}, chapterChoice: {}, chapterSrc: {}, ed: {}
   };
+  var EMPTY_SY = { version: '', source: '', editions: {}, stat: {}, chapters: {} };
   Y.BANK = {
-    meta: null, points: [], templates: [], essays: [], xref: EMPTY_XREF,
+    meta: null, points: [], templates: [], essays: [], xref: EMPTY_XREF, syllabus: EMPTY_SY,
     questions: [], byId: {}, qBySubject: {}, chapterById: {}, subjectById: {},
     loaded: 0, small: null, ready: null
   };
@@ -128,11 +129,14 @@
       return Promise.all([
         getJSON('points.json'), getJSON('templates.json'), getJSON('essays.json'),
         // 章节讲义 ↔ 题目对照表：缺失时降级为「仅按题库自带章节」，不影响刷题
-        getJSON('notes-xref.json').catch(function () { return null; })
+        getJSON('notes-xref.json').catch(function () { return null; }),
+        // 2027 大纲考点讲义层：缺失时降级，不影响刷题与原有讲义
+        getJSON('syllabus.json').catch(function () { return null; })
       ]);
     }).then(function (arr) {
       B.points = arr[0]; B.templates = arr[1]; B.essays = arr[2];
       B.xref = arr[3] || EMPTY_XREF;
+      B.syllabus = arr[4] || EMPTY_SY;
       onProgress && onProgress('装载考点与模板…', 16);
       return true;
     });
@@ -161,6 +165,42 @@
 
   /* ---------- 讲义 ↔ 题目对照（章 / 节 / 知识点三级） ---------- */
   Y.X = function () { return Y.BANK.xref || EMPTY_XREF; };
+
+  /* ---------- 2027 大纲考点讲义层 ---------- */
+  Y.SY = function () { return Y.BANK.syllabus || EMPTY_SY; };
+  Y.syllabusOf = function (cid) {
+    return (Y.SY().chapters || {})[String(cid)] || null;
+  };
+  Y.syllabusQids = function (cid, si, pi) {
+    var c = Y.syllabusOf(cid);
+    if (!c) return [];
+    var sec = c.sections[Number(si)];
+    if (!sec) return [];
+    var it = sec.items[Number(pi)];
+    return it ? (it.qids || []) : [];
+  };
+  /* arg: "cid" 整章 / "cid:si" 整节 / "cid:si:pi" 单个大纲考点 */
+  Y.syllabusIds = function (arg) {
+    var a = String(arg || '').split(':');
+    var c = Y.syllabusOf(a[0]);
+    if (!c) return [];
+    var secs = c.sections || [];
+    if (a.length >= 2) {
+      var sec = secs[Number(a[1])];
+      if (!sec) return [];
+      if (a.length >= 3) return (sec.items[Number(a[2])] || {}).qids || [];
+      secs = [sec];
+    }
+    var seen = {}, out = [];
+    secs.forEach(function (s) {
+      (s.items || []).forEach(function (it) {
+        (it.qids || []).forEach(function (id) {
+          if (!seen[id]) { seen[id] = 1; out.push(id); }
+        });
+      });
+    });
+    return out;
+  };
   Y.xrefOf = function (q) {
     if (!q) return null;
     var X = Y.X(), m = X.qmap && X.qmap[q.id];
@@ -329,6 +369,10 @@
         ids = choiceIds(Y.xrefIds(arg).map(function (id) { return B.byId[id]; }).filter(Boolean));
         break;
       }
+      case 'syl': {
+        ids = choiceIds(Y.syllabusIds(arg).map(function (id) { return B.byId[id]; }).filter(Boolean));
+        break;
+      }
       case 'chapter': ids = choiceIds(B.questions.filter(function (q) { return Y.chapterIdOf(q) === Number(arg); })); break;
       case 'subject': ids = choiceIds(B.qBySubject[arg] || B.questions.filter(function (q) { return (B.subjectById[q.sub] || {}).code === arg; })); break;
       case 'exam': ids = choiceIds(B.questions.filter(function (q) { return q.sid === Number(arg); })); break;
@@ -359,7 +403,7 @@
       mode: mode, arg: arg, title: title || '自由刷题', ids: ids,
       index: 0, created: Date.now(), view: 'do', shuffled: false
     };
-    if (mode === 'subject' || mode === 'chapter' || mode === 'xref') {
+    if (mode === 'subject' || mode === 'chapter' || mode === 'xref' || mode === 'syl') {
       var first = ids.findIndex(function (id) { return !st.answers[id]; });
       if (first > 0) s.index = first;
     }
