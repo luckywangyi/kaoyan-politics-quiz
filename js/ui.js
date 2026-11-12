@@ -205,7 +205,7 @@
       '<div class="xr-note-b">' +
       '章节、分节、考点名称逐条取自 <b>' + e(SY.source || '2027 考试大纲') + '</b>——两本辅导书都按大纲考点化编排，' +
       '因此按大纲重排即与两书章节体系对齐；表内另标注两本书<b>公开目录中的页码、考点编号区间、徐涛讲次与对应章</b>，供在自己正版书里定位。' +
-      '每个考点的「讲义精讲」来自本站讲义对应段落、「真题要点」由站内 1968 题自带的解析归纳，' +
+      '每个考点的「讲义精讲」来自本站讲义对应段落、「真题要点」由站内 ' + B().questions.length + ' 道题自带的解析归纳，' +
       '<b>不收录《核心考案》《精讲精练》正文</b>。' +
       '</div><div class="xr-note-src">' +
       '<span>肖：' + e(editions.xiao || '《知识点精讲精练》2027') + '</span>' +
@@ -631,7 +631,7 @@
     var idx = Y.clamp(Number(p.i || 0), 0, list.length - 1);
     var q = list[idx], rec = S().essays[q.id];
     var criteria = Y.parseJSON(q.criteria, []);
-    var html = head('材料分析大题实训', '肖四押题热点 · 采分点拆解 · 关键词比对');
+    var html = head('材料分析大题实训', '统考真题 · 押题热点 · 采分点拆解 · 关键词比对');
     html += '<div class="chips">' + list.map(function (x, i) {
       return '<button class="chip ' + (i === idx ? 'on' : '') + '" data-act="go" data-view="essays" data-i="' + i + '">分析题 ' + (i + 1) + ' · ' + e(sub(x.sub).short) + '</button>';
     }).join('') + '</div>';
